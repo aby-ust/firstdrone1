@@ -1,0 +1,75 @@
+pipeline:
+    name: pipeline002
+    identifier: pipeline002
+    projectIdentifier: proj03
+    orgIdentifier: org3
+    tags: {}
+    properties:
+        ci:
+            codebase:
+                connectorRef: git001
+                repoName: firstdrone1
+                build: <+input>
+    stages:
+        - stage:
+              name: approve002
+              identifier: approve002
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: approval002
+                                identifier: approval002
+                                type: HarnessApproval
+                                timeout: 1d
+                                spec:
+                                    approvalMessage: |-
+                                        Please review the following information
+                                        and approve the pipeline progression
+                                    includePipelineExecutionHistory: true
+                                    approvers:
+                                        minimumCount: 1
+                                        disallowPipelineExecutor: false
+                                        userGroups:
+                                            - account.approver
+                                            - account.devops
+                                    approverInputs: []
+              tags: {}
+        - stage:
+              name: build002
+              identifier: build002
+              description: ""
+              type: CI
+              spec:
+                  cloneCodebase: true
+                  infrastructure:
+                      type: KubernetesHosted
+                      spec:
+                          identifier: k8s-hosted-infra
+                  execution:
+                      steps:
+                          - step:
+                                type: BuildAndPushDockerRegistry
+                                name: approve002
+                                identifier: approve002
+                                spec:
+                                    connectorRef: doc001
+                                    repo: abyalias/doc01
+                                    tags:
+                                        - tags002
+    notificationRules:
+        - name: notify001
+          identifier: notify001
+          pipelineEvents:
+              - type: AllEvents
+          notificationMethod:
+              type: Email
+              spec:
+                  userGroups:
+                      - account.approver
+                      - account.devops
+                  recipients:
+                      - abyalias10@gmail.com
+          enabled: true
