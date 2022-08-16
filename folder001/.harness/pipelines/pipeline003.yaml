@@ -1,0 +1,61 @@
+pipeline:
+    name: pipeline003
+    identifier: pipeline003
+    projectIdentifier: proj03
+    orgIdentifier: org3
+    tags: {}
+    properties:
+        ci:
+            codebase:
+                connectorRef: git001
+                repoName: firstdrone1
+                build: <+input>
+    stages:
+        - stage:
+              name: approve003
+              identifier: approve003
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: approval003
+                                identifier: approval003
+                                type: HarnessApproval
+                                timeout: 1d
+                                spec:
+                                    approvalMessage: |-
+                                        Please review the following information
+                                        and approve the pipeline progression
+                                    includePipelineExecutionHistory: true
+                                    approvers:
+                                        minimumCount: 1
+                                        disallowPipelineExecutor: false
+                                        userGroups:
+                                            - account.approver
+                                            - account.devops
+                                    approverInputs: []
+              tags: {}
+        - stage:
+              name: build003
+              identifier: build003
+              description: ""
+              type: CI
+              spec:
+                  cloneCodebase: true
+                  infrastructure:
+                      type: KubernetesHosted
+                      spec:
+                          identifier: k8s-hosted-infra
+                  execution:
+                      steps:
+                          - step:
+                                type: BuildAndPushDockerRegistry
+                                name: docker003
+                                identifier: docker003
+                                spec:
+                                    connectorRef: doc001
+                                    repo: abyalias/doc02
+                                    tags:
+                                        - tags02
