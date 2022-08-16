@@ -1,0 +1,23 @@
+connector:
+  name: git001
+  identifier: git001
+  description: ""
+  orgIdentifier: org3
+  projectIdentifier: proj03
+  type: Github
+  spec:
+    url: https://github.com/aby-ust
+    validationRepo: firstdrone1
+    authentication:
+      type: Http
+      spec:
+        type: UsernameToken
+        spec:
+          username: aby-ust
+          tokenRef: encrypted
+    apiAccess:
+      type: Token
+      spec:
+        tokenRef: encrypted
+    executeOnDelegate: false
+    type: Account
