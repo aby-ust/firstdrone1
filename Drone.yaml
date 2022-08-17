@@ -1,4 +1,4 @@
-#rDrone CI File!
+#Drone CI File!
 #Commit Message: Drone! Captain Canary is here! 
 
 kind: pipeline
