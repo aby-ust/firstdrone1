@@ -98,17 +98,6 @@ pipeline:
                   execution:
                       steps:
                           - step:
-                                type: Policy
-                                name: newpolicy
-                                identifier: newpolicy
-                                spec:
-                                    policySets:
-                                        - account.example
-                                    type: Custom
-                                    policySpec:
-                                        payload: sample value
-                                timeout: 10m
-                          - step:
                                 name: Rollout Deployment
                                 identifier: rolloutDeployment
                                 type: K8sRollingDeploy
