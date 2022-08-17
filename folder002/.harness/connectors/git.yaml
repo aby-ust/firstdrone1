@@ -1,0 +1,22 @@
+connector:
+  name: git
+  identifier: git
+  description: ""
+  orgIdentifier: org3
+  projectIdentifier: proj003
+  type: Github
+  spec:
+    url: https://github.com/kubernetes/website
+    validationRepo: test
+    authentication:
+      type: Http
+      spec:
+        type: OAuth
+        spec:
+          tokenRef: account.harnessoauthaccesstoken_github_1660709902395
+    apiAccess:
+      type: OAuth
+      spec:
+        tokenRef: account.harnessoauthaccesstoken_github_1660709902395
+    executeOnDelegate: false
+    type: Repo
