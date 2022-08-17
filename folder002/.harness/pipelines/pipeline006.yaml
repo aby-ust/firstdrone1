@@ -1,0 +1,139 @@
+pipeline:
+    name: pipeline006
+    identifier: pipeline006
+    projectIdentifier: proj003
+    orgIdentifier: org3
+    tags: {}
+    properties:
+        ci:
+            codebase:
+                connectorRef: githubconnect
+                repoName: firstdrone1
+                build: <+input>
+    stages:
+        - stage:
+              name: build
+              identifier: build
+              description: ""
+              type: CI
+              spec:
+                  cloneCodebase: true
+                  infrastructure:
+                      type: KubernetesHosted
+                      spec:
+                          identifier: k8s-hosted-infra
+                  execution:
+                      steps:
+                          - step:
+                                type: BuildAndPushDockerRegistry
+                                name: docker
+                                identifier: docker
+                                spec:
+                                    connectorRef: dock
+                                    repo: abyalias/doc03
+                                    tags:
+                                        - new
+        - stage:
+              name: APPROVER
+              identifier: APPROVER
+              description: ""
+              type: Approval
+              spec:
+                  execution:
+                      steps:
+                          - step:
+                                name: approval
+                                identifier: approval
+                                type: HarnessApproval
+                                timeout: 1d
+                                spec:
+                                    approvalMessage: |-
+                                        Please review the following information
+                                        and approve the pipeline progression
+                                    includePipelineExecutionHistory: true
+                                    approvers:
+                                        minimumCount: 1
+                                        disallowPipelineExecutor: false
+                                        userGroups:
+                                            - account.approver
+                                            - account.devops
+                                    approverInputs: []
+              tags: {}
+        - stage:
+              name: cd stage
+              identifier: cd_stage
+              description: ""
+              type: Deployment
+              spec:
+                  serviceConfig:
+                      serviceRef: nginx2
+                      serviceDefinition:
+                          spec:
+                              variables: []
+                              manifests:
+                                  - manifest:
+                                        identifier: firstci
+                                        type: K8sManifest
+                                        spec:
+                                            store:
+                                                type: Github
+                                                spec:
+                                                    connectorRef: git
+                                                    gitFetchType: Branch
+                                                    paths:
+                                                        - content/en/examples/application/nginx-app.yaml
+                                                    branch: main
+                                            skipResourceVersioning: false
+                              artifacts: {}
+                          type: Kubernetes
+                  infrastructure:
+                      environmentRef: sample
+                      infrastructureDefinition:
+                          type: KubernetesDirect
+                          spec:
+                              connectorRef: connector
+                              namespace: harness-delegate-ng
+                              releaseName: release-<+INFRA_KEY>
+                      allowSimultaneousDeployments: false
+                  execution:
+                      steps:
+                          - step:
+                                name: Rollout Deployment
+                                identifier: rolloutDeployment
+                                type: K8sRollingDeploy
+                                timeout: 10m
+                                spec:
+                                    skipDryRun: false
+                                    delegateSelectors:
+                                        - delegate
+                                failureStrategies: []
+                      rollbackSteps:
+                          - step:
+                                name: Rollback Rollout Deployment
+                                identifier: rollbackRolloutDeployment
+                                type: K8sRollingRollback
+                                timeout: 10m
+                                spec: {}
+              tags: {}
+              failureStrategies:
+                  - onFailure:
+                        errors:
+                            - AllErrors
+                        action:
+                            type: StageRollback
+              delegateSelectors:
+                  - delegate
+    notificationRules:
+        - name: notify
+          identifier: notify
+          pipelineEvents:
+              - type: AllEvents
+          notificationMethod:
+              type: Email
+              spec:
+                  userGroups:
+                      - account.approver
+                      - account.devops
+                  recipients:
+                      - abyalias10@gmail.com
+          enabled: true
